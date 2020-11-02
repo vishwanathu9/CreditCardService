@@ -1,16 +1,18 @@
 ﻿using CreditCardService.IRepository;
 using CreditCardService.Models;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Newtonsoft.Json;
+using System.Net.Mime;
 using System.Threading.Tasks;
+
 
 
 namespace CreditCardService.Controllers
 {
+    [EnableCors("MyExposeResponseHeadersPolicy")]
     [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
-    public class CreditCardController
+    public class CreditCardController : Controller
     {
         private ICreditCardRepository _creditCardRepository;
         public CreditCardController(ICreditCardRepository creditCardRepository)
@@ -18,48 +20,113 @@ namespace CreditCardService.Controllers
             _creditCardRepository = creditCardRepository;
         }
         [HttpGet]
-        public Task<string> Get()
-        {
-            return this.GetCreditcard();
-        }
-        public async Task<string> GetCreditcard()
+        [Microsoft.AspNetCore.Mvc.Route("AllcardDetails")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get()
         {
             var cards = await _creditCardRepository.Get();
-            return JsonConvert.SerializeObject(cards);
+            if (cards != null)
+            {
+                return new OkObjectResult(cards);
+            }
+            else
+            {
+                return new NotFoundObjectResult("No Card Details Available !");
+            }
+        }
 
-        }
         [HttpGet("{cardId}")]
-        public Task<string> Get(string CardId)
-        {
-            return this.GetCreditcardbyId(CardId);
-        }
-        public async Task<string> GetCreditcardbyId(string CardId)
+        [Microsoft.AspNetCore.Mvc.Route("GetCardDetailById/{CardId}")]
+
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(string CardId)
         {
             var cards = await _creditCardRepository.Get(CardId) ?? new CreditCard();
-            return JsonConvert.SerializeObject(cards);
-
+            if (cards.CardId != null)
+            {
+                return new OkObjectResult(cards);
+            }
+            else
+            {
+                return new NotFoundObjectResult("Card Not Found !");
+            }
         }
+
 
         [HttpPost]
-        public async Task<string> Post([FromBody] CreditCard creditCard)
+        [Microsoft.AspNetCore.Mvc.Route("InsertCreditCardDetails")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Post([FromBody] CreditCard creditCard)
         {
-            await _creditCardRepository.Add(creditCard);
-            return "";
+            if (ModelState.IsValid)
+            {
+                if (Mod10Check.LuhnCheckcompliant(creditCard.CardNumber))
+                {
+                    var result = await _creditCardRepository.Add(creditCard);
+                    if (result != null)
+                    {
+                        return new OkObjectResult(creditCard);
+                    }
+                    else
+                    {
+                        return new BadRequestObjectResult("Bad Request");
+                    }
+                }
+                else
+                {
+                    return new BadRequestObjectResult("Invalid CreditCard");
+                }
+            }
+            else
+            {
+                return new BadRequestObjectResult("Invalid Input ");
+            }
+
         }
         [HttpPut("{cardId}")]
-        public async Task<string> Put(string cardId, [FromBody] CreditCard creditCard)
+        [Microsoft.AspNetCore.Mvc.Route("UpdateCreditCardDetails/{cardId}")]
+        public async Task<IActionResult> Put(string cardId, [FromBody] CreditCard creditCard)
         {
-            if (string.IsNullOrEmpty(cardId)) return "Invalid CardID !";
-            return await _creditCardRepository.Update(cardId, creditCard);
+            if (string.IsNullOrEmpty(cardId)) return new NotFoundObjectResult("Invalid CardID !");
+            if (ModelState.IsValid)
+            {
+                if (Mod10Check.LuhnCheckcompliant(creditCard.CardNumber))
+                {
+                    var result = await _creditCardRepository.Update(cardId, creditCard);
+                    if (result != null)
+                    {
+                        return new OkObjectResult(creditCard);
+                    }
+                    else
+                    {
+                        return new BadRequestObjectResult("Bad Request");
+                    }
+                }
+                else
+                {
+                    return new BadRequestObjectResult("Invalid CreditCard");
+                }
+            }
+            else
+            {
+                return new BadRequestObjectResult("Bad Request");
+            }
 
         }
 
         [HttpDelete("{cardId}")]
-        public async Task<string>Delete(string  cardId)
+        [Microsoft.AspNetCore.Mvc.Route("Delete/{cardId}")]
+        public async Task<IActionResult> Delete([FromRoute] string cardId)
         {
-            if (string.IsNullOrEmpty(cardId)) return "Invalid CardID !";
-             await _creditCardRepository.Remove(cardId);
-            return "";
+            if (string.IsNullOrEmpty(cardId)) return new BadRequestObjectResult("Invalid CardID !");
+            await _creditCardRepository.Remove(cardId);
+            return new OkObjectResult("");
         }
     }
 }

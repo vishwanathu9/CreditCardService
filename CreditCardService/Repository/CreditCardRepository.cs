@@ -1,7 +1,6 @@
 ﻿using CreditCardService.DbModels;
 using CreditCardService.IRepository;
 using CreditCardService.Models;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Collections.Generic;
@@ -9,17 +8,18 @@ using System.Threading.Tasks;
 
 namespace CreditCardService.Repository
 {
-    public class CreditCardRepository:ICreditCardRepository
+    public class CreditCardRepository : ICreditCardRepository
     {
         private readonly ObjectContext _context = null;
-        public CreditCardRepository(IOptions<Settings>settings)
+        public CreditCardRepository(IOptions<Settings> settings)
         {
             _context = new ObjectContext(settings);
         }
 
-        public async Task Add(CreditCard creditCard)
+        public async Task<CreditCard> Add(CreditCard creditCard)
         {
             await _context.creditCard.InsertOneAsync(creditCard);
+            return creditCard;
         }
         public async Task<IEnumerable<CreditCard>> Get()
         {
@@ -32,15 +32,15 @@ namespace CreditCardService.Repository
             return await _context.creditCard.Find(creditCard).FirstOrDefaultAsync();
         }
 
-        public  async Task<DeleteResult> Remove(string cardId)
+        public async Task<DeleteResult> Remove(string cardId)
         {
             return await _context.creditCard.DeleteOneAsync(Builders<CreditCard>.Filter.Eq("CardId", cardId));
         }
 
-        public async Task<string> Update(string cardId, CreditCard creditCard)
+        public async Task<CreditCard> Update(string cardId, CreditCard creditCard)
         {
             await _context.creditCard.ReplaceOneAsync(x => x.CardId == cardId, creditCard);
-            return "";
+            return creditCard;
         }
     }
 

@@ -2,10 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CreditCardService.DbModels
 {
@@ -21,7 +17,7 @@ namespace CreditCardService.DbModels
             settings.Value.Database = Configuration.GetSection("MongoConnection:Database").Value;
 
             var client = new MongoClient(settings.Value.ConnectionString);
-            if(client!=null)
+            if (client != null)
             {
                 _database = client.GetDatabase(settings.Value.Database);
 

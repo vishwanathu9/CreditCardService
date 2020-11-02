@@ -1,0 +1,134 @@
+<div class="container">
+  <mat-card>
+    <mat-toolbar color="accent">
+      <div align="center" style="color:white;text-align: right;">
+        Credit card Application
+      </div>
+    </mat-toolbar>
+    <br><br>
+    <mat-card-content>
+     <form [formGroup]="creditCardForm" (ngSubmit)="onFormSubmit()">
+        <table>
+          <tr>
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input formControlName="CardId" matTooltip="Enter Card Id" matInput placeholder="CardId" min="10" maxlength="10" >
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('CardId').value && creditCardForm.get('CardId').touched"></span>
+              </mat-error>
+            </td>
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input formControlName="CardNumber" matTooltip="Enter Card Number" matInput placeholder="CardNumber"  min="16" maxlength="16" >
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('CardNumber').value && creditCardForm.get('CardNumber').touched"></span>
+              </mat-error>
+            </td>
+
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input formControlName="AccountNumber" matTooltip="Enter Account Number" matInput placeholder="AccountNumber" min="10" maxlength="10" >
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('AccountNumber').value && creditCardForm.get('AccountNumber').touched"></span>
+              </mat-error>
+            </td>
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input formControlName="InitialBalance" matTooltip="Enter Initial Balance" type="number" matInput placeholder="InitialBalance">
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('InitialBalance').value && creditCardForm.get('InitialBalance').touched"></span>
+              </mat-error>
+            </td>
+
+
+          </tr>
+          <tr>
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input formControlName="Age" matTooltip="Enter Age" matInput placeholder="Age" type="number"  maxlength="2" >
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('Age').value && creditCardForm.get('Age').touched"></span>
+              </mat-error>
+            </td>
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input matTooltip="Enter Address" formControlName="Address" matInput placeholder="Address"  min="50" maxlength="50">
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('Address').value && creditCardForm.get('Address').touched"></span>
+              </mat-error>
+            </td>
+            <td class="tbl1">
+              <mat-form-field class="demo-full-width">
+                <input formControlName="Name" matTooltip="Enter Name" matInput placeholder="Name">
+              </mat-form-field>
+              <mat-error>
+                <span *ngIf="!creditCardForm.get('Name').value && creditCardForm.get('Name').touched"></span>
+              </mat-error>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="content-center">
+              <button type="submit" mat-raised-button color="accent" matTooltip="Click Submit Button" >Submit</button>
+              <button type="reset" mat-raised-button color="accent" matTooltip="Click Reset Button" (click)="resetForm()">Reset</button>
+            </td>
+            <td>
+              <p *ngIf="dataSaved" style="color:rgb(0, 128, 0);font-size:20px;font-weight:bold" Class="success" align="left">
+                {{massage}}
+              </p>
+            </td>
+          </tr>
+        </table>
+        <br><br>
+        <table class="table">
+          <tr ngclass="btn-primary">
+            <th class="tbl2">Card Id</th>
+            <th class="tbl2">Name</th>
+            <th class="tbl2">Card Number</th>
+            <th class="tbl2">Account Number</th>
+            <th class="tbl2">Age</th>
+            <th class="tbl2">Address</th>
+            <th class="tbl2">InitialBalance</th>
+          </tr>
+          <tr *ngFor="let cards of allCards | async">
+            <td class="tbl2">{{cards.cardId}}</td>
+            <td class="tbl2">{{cards.name}}</td>
+            <td class="tbl2">{{cards.cardNumber  }}</td>
+            <td class="tbl2">{{cards.accountNumber}}</td>
+            <td class="tbl2">{{cards.age}}</td>
+            <td class="tbl2">{{cards.address}}</td>
+            <td class="tbl2">{{cards.initialBalance}}</td>
+            <td class="tbl2">
+              <button type="button" class="btn btn-info" matTooltip="Click Edit Button" (click)="loadCardToEdit(cards.cardId)">Edit</button>
+            </td>
+            <td class="tbl2">
+              <button type="button" class="btn btn-danger" matTooltip="Click Delete Button" (click)="deleteCard(cards.cardId)">Delete</button>
+            </td>
+          </tr>
+
+        </table>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>  
+<script type="text/javascript">
+    $(document).ready(function() {
+      $(".only-numeric").bind("keypress", function (e) {
+          var keyCode = e.which ? e.which : e.keyCode
+
+          if (!(keyCode >= 48 && keyCode <= 57)) {
+            $(".error").css("display", "inline");
+            return false;
+          }else{
+            $(".error").css("display", "none");
+          }
+      });
+    });
+
+</script>

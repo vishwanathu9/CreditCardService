@@ -1,22 +1,23 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace CreditCardService.Models
 {
     public class CreditCard
     {
         [BsonId]
-        //[BsonRepresentation(BsonType.ObjectId)]
-      
-        public string  CardId { get; set; }
+        [Required]
+        public string CardId { get; set; }
         [Required]
         [MaxLength(16), MinLength(16)]
-        
         public string CardNumber { get; set; }
-       
         public decimal InitialBalance { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public string Address { get; set; }
+        [Required]
+        [MaxLength(10), MinLength(10)]
+        public string AccountNumber { get; set; }
     }
 }

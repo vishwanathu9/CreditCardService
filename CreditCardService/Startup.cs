@@ -1,23 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CreditCardService.DbModels;
 using CreditCardService.IRepository;
+using CreditCardService.Models;
 using CreditCardService.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 
 namespace CreditCardService
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -32,6 +27,16 @@ namespace CreditCardService
             services.AddControllers(options => options.EnableEndpointRouting = false);
             services.Configure<Settings>(o => { o.iConfigurationRoot = (IConfigurationRoot)Configuration; });
             services.AddTransient<ICreditCardRepository, CreditCardRepository>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("MyExposeResponseHeadersPolicy",
+                                  builder =>
+                                  {
+                                      builder.AllowAnyOrigin()
+                                      .WithExposedHeaders("x-custom-header"); ;
+                                  });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,10 +46,13 @@ namespace CreditCardService
             {
                 app.UseDeveloperExceptionPage();
             }
-           
-            app.UseRouting();          
 
+            app.UseRouting();
+            app.UseCorsMiddleware();
+            app.UseCors();
             app.UseAuthorization();
+            app.UseHttpsRedirection();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -53,5 +61,6 @@ namespace CreditCardService
             });
 
         }
+
     }
 }
